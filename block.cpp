@@ -10,7 +10,6 @@
 //*************************************************************************************************
 //*** マクロ定義 ***
 //*************************************************************************************************
-#define MAX_BLOCK		(128)		// ブロックの最大数
 
 //*************************************************************************************************
 //*** グローバル変数 ***
@@ -18,9 +17,11 @@
 LPDIRECT3DTEXTURE9		g_pTextureBlock = NULL;	// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffBlock = NULL;	// 頂点バッファのポインタ
 BLOCK g_aBlock[MAX_BLOCK] = {};					// ブロックの情報
+BLOCK g_aBlockDoppel[MAX_BLOCK] = {};			// ブロックの情報のコピー(データの管理に使用 ※基本的に使用しないこと！)
 int g_nCheckCollision;
 int g_nSelectBlock;								//選択中のブロック
 int g_nCounterBlock;							//生成されたブロックの数
+bool g_bChangedBlock;							// ブロックの情報が変化したか
 
 //================================================================================================================
 // --- ブロックの初期化 ---
@@ -32,22 +33,31 @@ void InitBlock(void)
 	int nCntBlock = 0;
 	g_nCheckCollision = 0;
 	g_nSelectBlock = 0;
+	g_bChangedBlock = false;
 
 	for (nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
-		g_aBlock[nCntBlock].pos = D3DXVECTOR3(600.0f, 450.0f, 0.0f);
-		g_aBlock[nCntBlock].posOld = g_aBlock[nCntBlock].pos;
-		g_aBlock[nCntBlock].fHeight = 150.0f;
-		g_aBlock[nCntBlock].fWidth = 200.0f;
-		g_aBlock[nCntBlock].bUse = false;
+		g_aBlock[nCntBlock].pos = g_aBlockDoppel[nCntBlock].pos = D3DXVECTOR3_NULL;
+		g_aBlock[nCntBlock].posOld = g_aBlockDoppel[nCntBlock].posOld = D3DXVECTOR3_NULL;
+		g_aBlock[nCntBlock].col = g_aBlockDoppel[nCntBlock].col = D3DXCOLOR_NULL;
+		g_aBlock[nCntBlock].fHeight = g_aBlockDoppel[nCntBlock].fHeight = 0.0f;
+		g_aBlock[nCntBlock].fWidth = g_aBlockDoppel[nCntBlock].fWidth = 0.0f;
+		g_aBlock[nCntBlock].bUse = g_aBlockDoppel[nCntBlock].bUse = false;
 	}
 
 	SetBlock(D3DXVECTOR3(200.0f, 670.0f, 0.0f), 50.0f, 50.0f);
+	g_aBlockDoppel[0].pos = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
+	g_aBlockDoppel[0].posOld = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
+	g_aBlockDoppel[0].fHeight = 50.0f;
+	g_aBlockDoppel[0].fWidth = 50.0f;
+	g_aBlockDoppel[0].bUse = true;
+
+/*
 	SetBlock(D3DXVECTOR3(200.0f, 620.0f, 0.0f), 50.0f, 50.0f);
 	SetBlock(D3DXVECTOR3(200.0f, 570.0f, 0.0f), 50.0f, 50.0f);
 	SetBlock(D3DXVECTOR3(200.0f, 520.0f, 0.0f), 50.0f, 50.0f);
 	SetBlock(D3DXVECTOR3(200.0f, 470.0f, 0.0f), 50.0f, 50.0f);
-
+*/
 	/*SetBlock(D3DXVECTOR3(300.0f, 710.0f, 0.0f), 50.0f, 50.0f);
 	SetBlock(D3DXVECTOR3(350.0f, 710.0f, 0.0f), 50.0f, 50.0f);
 	SetBlock(D3DXVECTOR3(400.0f, 710.0f, 0.0f), 50.0f, 50.0f);
@@ -72,8 +82,6 @@ void InitBlock(void)
 
 	for (nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
-		g_aBlock[nCntBlock].col = D3DXCOLOR_NULL;
-
 		/*** 頂点座標の設定の設定 ***/
 		pVtx[0].pos.x = g_aBlock[nCntBlock].pos.x;
 		pVtx[0].pos.y = g_aBlock[nCntBlock].pos.y;
@@ -223,6 +231,21 @@ void UpdateBlock(void)
 
 	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
+		// コピーデータと見比べて、変化がないか確認
+		if (g_bChangedBlock == false && nCntBlock != 0)
+		{
+			if (g_aBlock[nCntBlock].pos != g_aBlockDoppel[nCntBlock].pos) 
+			{ SetEnableChanged(true); g_bChangedBlock = true; }
+			if (g_aBlock[nCntBlock].col != g_aBlockDoppel[nCntBlock].col) 
+			{ SetEnableChanged(true); g_bChangedBlock = true; }
+			if (g_aBlock[nCntBlock].fWidth != g_aBlockDoppel[nCntBlock].fWidth)
+			{ SetEnableChanged(true); g_bChangedBlock = true; }
+			if (g_aBlock[nCntBlock].fHeight != g_aBlockDoppel[nCntBlock].fHeight)
+			{ SetEnableChanged(true); g_bChangedBlock = true; }
+			if (g_aBlock[nCntBlock].bUse != g_aBlockDoppel[nCntBlock].bUse) 
+			{ SetEnableChanged(true); g_bChangedBlock = true; }
+		}
+
 		if (g_aBlock[nCntBlock].bUse == true)
 		{
 			/*** 頂点座標の設定の設定 ***/
@@ -244,18 +267,18 @@ void UpdateBlock(void)
 
 			if (g_nSelectBlock == nCntBlock)
 			{
-				g_aBlock[nCntBlock].col = D3DXCOLOR(0, 0, 255,1.0f);
+				pVtx[0].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
+				pVtx[1].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
+				pVtx[2].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
+				pVtx[3].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
 			}
 			else if (g_nSelectBlock != nCntBlock)
 			{
-				g_aBlock[nCntBlock].col = D3DXCOLOR_NULL;
+				pVtx[0].col = g_aBlock[nCntBlock].col;
+				pVtx[1].col = g_aBlock[nCntBlock].col;
+				pVtx[2].col = g_aBlock[nCntBlock].col;
+				pVtx[3].col = g_aBlock[nCntBlock].col;
 			}
-
-
-			pVtx[0].col = g_aBlock[nCntBlock].col;
-			pVtx[1].col = g_aBlock[nCntBlock].col;
-			pVtx[2].col = g_aBlock[nCntBlock].col;
-			pVtx[3].col = g_aBlock[nCntBlock].col;
 		}
 
 		pVtx += 4;
@@ -445,6 +468,7 @@ void SetBlock(D3DXVECTOR3 pos, float fWidth, float fHeight)
 		{
 			g_nCounterBlock++;
 			g_aBlock[nCntBlock].pos = pos;
+			g_aBlock[nCntBlock].posOld = pos;
 			g_aBlock[nCntBlock].fWidth = fWidth;
 			g_aBlock[nCntBlock].fHeight = fHeight;
 
@@ -469,12 +493,37 @@ int GetSelectNumber(void)
 {
 	return g_nSelectBlock;
 }
+
 //================================================================================================================
 // --- 設置したブロックの数の取得 ---
 //================================================================================================================
 int GetBlockMax(void)
 {
 	return g_nCounterBlock;
+}
+
+//================================================================================================================
+// --- ファイルから取得した情報の反映 ---
+//================================================================================================================
+void SetBlockFromFile(BLOCKFROMEDIT* pbfeBlock)
+{
+	BLOCK *pBlock = &g_aBlock[0];
+	BLOCK *pBlockDoppel = &g_aBlockDoppel[0];
+
+	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++, pBlock++, pBlockDoppel++)
+	{ // 設定
+		if (pBlock->bUse == false)
+		{ // 使われていなければデータを保存、コピー作成
+			pBlock->pos = pBlockDoppel->pos = pbfeBlock->pos;				// 位置
+			pBlock->col = pBlockDoppel->col = pbfeBlock->col;				// 色
+			pBlock->fWidth = pBlockDoppel->fWidth = pbfeBlock->fWidth;		// 横幅
+			pBlock->fHeight = pBlockDoppel->fHeight = pbfeBlock->fHeight;	// 縦幅
+			pBlock->bUse = pBlockDoppel->bUse = true;						// 使用済みに変更
+			g_nCounterBlock++;			// ポリゴンの数を増やす
+
+			break;
+		}
+	}
 }
 
 //消せるようにする,ブロックの選択,移動速度

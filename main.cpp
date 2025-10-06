@@ -34,14 +34,15 @@ void ToggleFullscreen(HWND hWnd);
 //**********************************************************************************
 LPDIRECT3D9				g_pD3D = NULL;					// Direct3Dオブジェクトへのポインタ
 LPDIRECT3DDEVICE9		g_pD3DDevice = NULL;			// Direct3Dデバイスへのポインタ
-MODE g_mode = MODE_TITLE;								// 現在の画面
-MODE g_modeExac = MODE_TITLE;							// ひとつ前の過去の画面
+MODE g_mode = MODE_EDITER;								// 現在の画面
+MODE g_modeExac = MODE_EDITER;							// ひとつ前の過去の画面
 LPD3DXFONT g_pFont = NULL;								// フォントへのポインタ
 HWND g_hWnd = NULL;										// 獲得したウィンドウハンドル
 int g_nCountFPS = 0;									// FPSカウンタ
 bool g_isFullscreen = false;							// フルスクリーンの使用状況
 RECT g_windowRect;										// ウィンドウサイズ
 GAMEDIFFICULTY g_Difficulty = GAMEDIFFICULTY_NORMAL;	// ゲームの難易度
+TCHAR g_szFileTitle[MAX_TITLE] = "暗黒破壊神ステージエディタ―マン";	// ファイルの名前
 
 //================================================================================================================
 // --- メイン関数 ---
@@ -74,7 +75,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 		(HBRUSH)(COLOR_WINDOW + 1),				// クライアント領域の背景色
 		MAKEINTRESOURCE(IDR_MENU1),				// メニューバー
 		CLASS_NAME,								// ウィンドウクラスの名前
-		NULL									// ファイルのアイコン
+		LoadIcon(hInstance,(LPCSTR)IDI_ICON2)	// ファイルのアイコン
 	}; 
 
 	// ウィンドウクラスの登録
@@ -247,8 +248,34 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case ID_RESET:
 
 			// ここにエディタ使用後の処理を書く
-			UninitEditer();
-			InitEditer();
+			SetMode(MODE_EDITER);
+			memset(g_szFileTitle, NULL, sizeof(g_szFileTitle));
+			strcpy(g_szFileTitle, "暗黒破壊神ステージエディタ―マン");
+			SetWindowText(hWnd, g_szFileTitle);
+
+			break;
+
+		case ID_UPDATESAVE:
+
+			pFile = fopen(g_szFileTitle, "wb");			// 入力されたファイルパスで作成
+
+			if (pFile == NULL) { MessageBox(NULL, TEXT("バイナリデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
+
+			pbfeInfo = GetEditerInfo();
+
+			if (pbfeInfo == NULL)
+			{
+				MessageBox(NULL, TEXT("BFE構造体のポインタの取得に失敗"), TEXT("Error"), MB_ICONHAND);
+				break;
+			}
+
+			nCntBlock = GetBlockMax();
+
+			fwrite(&nCntBlock, sizeof(int), 1, pFile);
+
+			fwrite(pbfeInfo, sizeof(BLOCKFROMEDIT), nCntBlock, pFile);
+
+			fclose(pFile);
 
 			break;
 
@@ -281,9 +308,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				pFile = fopen(tszFilePath, "wb");			// 入力されたファイルパスで作成
 
-				if (pFile == NULL) { MessageBox(NULL, TEXT("UIデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
+				if (pFile == NULL) { MessageBox(NULL, TEXT("バイナリデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
 
 				SetWindowText(hWnd, oFileName.lpstrFile);
+				memset(g_szFileTitle, NULL, sizeof(g_szFileTitle));
+				strcpy(g_szFileTitle, oFileName.lpstrFile);
 
 				// 設置したポリゴンの情報を設置数分取得
 
@@ -312,7 +341,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ZeroMemory(&oFileName, sizeof(OPENFILENAME));								// 初期化
 			oFileName.lStructSize = sizeof(OPENFILENAME);								// サイズ設定
 			oFileName.hwndOwner = hWnd;													// ウィンドウハンドル
-			oFileName.lpstrFilter = TEXT("UI FILE(*.ui)\0*.ui;\0\0");					// 開くファイルの種類
+			oFileName.lpstrFilter = TEXT("バイナリファイル (*.bin)\0*.bin;\0\0");					// 開くファイルの種類
 			oFileName.nFilterIndex = 1;													// ファイルフィルター
 			oFileName.lpstrFile = szFileName;											// 取得したファイルパス
 			oFileName.nMaxFile = MAX_PATH;												// 上記の文字列のデータの最大数
@@ -326,31 +355,40 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (!GetOpenFileName(&oFileName)) break;
 
 			pFile = fopen(oFileName.lpstrFile, "rb");									// 選択されたファイルパスを開く
-			if (pFile == NULL) { MessageBox(NULL, TEXT("UIデータの読み込みに失敗"), TEXT("Error"), MB_ICONHAND); break; };
+			if (pFile == NULL) { MessageBox(NULL, TEXT("バイナリデータの読み込みに失敗"), TEXT("Error"), MB_ICONHAND); break; };
 
 			SetWindowText(hWnd, oFileName.lpstrFile);
+			memset(g_szFileTitle, NULL, sizeof(g_szFileTitle));
+			strcpy(g_szFileTitle, oFileName.lpstrFile);
 
-			UninitEditer();
-			InitEditer();
+			// 再起動
+			SetMode(MODE_EDITER);
+
+			// 初期化後、空のエディタのポインタを取得
 			pbfeInfo = GetEditerInfo();
+
 			if (pbfeInfo == NULL)
-			{
+			{ // ポインタの取得失敗時
 				MessageBox(NULL, TEXT("BFE構造体のポインタの取得に失敗"), TEXT("Error"), MB_ICONHAND);
 				break;
 			}
 
+			// ポリゴンの描画数を取得
 			fread_s(&nCntBlock, sizeof(int), sizeof(int), 1, pFile);
 
+			// ポリゴンの描画数分読み込み
 			fread(pbfeInfo, sizeof(BLOCKFROMEDIT), nCntBlock, pFile);
 
 			for (int nCnt = 0; nCnt < nCntBlock; nCnt++, pbfeInfo++)
-			{
+			{ // ポリゴンの描画数分情報を送信
 				SetBlockFromFile(pbfeInfo);
 			}
 
 			break;
 
 		case ID_VERSION:
+
+			// バージョン情報
 
 			MessageBox(hWnd, "暗黒破壊神ステージエディター\n\nAuthor : \tSAITO TENMA\n\tNAGATE KEITARO\n\tAIZU SYUMA\n\nMade :\t2025\n\nver : \t1.0", "プロパティ", MB_ICONINFORMATION);
 
@@ -488,13 +526,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//	return E_FAIL;
 	//}
 
-	//SetMode(g_mode);
-
-	//InitFade(g_mode);
-
-	InitPlayer();
-
-	InitBlock();
+	SetMode(g_mode);
 
 	return S_OK;
 }
@@ -528,9 +560,7 @@ void Uninit(void)
 	// マウスの終了処理
 	UninitMouse();
 
-	UninitBlock();
-
-	UninitPlayer();
+	UninitEditer();
 
 	// デバッグ表示用フォントの破棄
 	if (g_pFont != NULL)
@@ -574,52 +604,22 @@ void Update(void)
 	// マウスの更新処理
 	UpdateMouse();
 
-	UpdatePlayer();
-	UpdateBlock();
-
-#if 0
+#if 1
 	// 現在の画面(モード)の更新処理
 	switch (g_mode)
 	{
-	case MODE_TITLE:
-		UpdateTitle();
+	case MODE_EDITER:
 
-		break;
-
-	case MODE_GAME:
-		UpdateGame();
-
-		break;
-
-	case MODE_RESULT:
-		UpdateResult();
-
-		break;
-
-	case MODE_GAMEOVER:
-		UpdateGameover();
-
-		break;
-
-	case MODE_GAMECLEAR:
-		UpdateGameclear();
-
-		break;
-
-	case MODE_CREDIT:
-		UpdateCredit();
+		UpdateEditer();
 
 		break;
 	}
 
-	// フェードの更新処理
-	UpdateFade();
+	//// フェードの更新処理
+	//UpdateFade();
 
-	// サウンドの更新処理
-	UpdateSound();
-
-	// ログの更新処理
-	UpdateLog();
+	//// サウンドの更新処理
+	//UpdateSound();
 #endif
 }
 
@@ -636,37 +636,19 @@ void Draw(void)
 	// 描画開始
 	if (SUCCEEDED(g_pD3DDevice->BeginScene()))
 	{// 描画開始が成功した場合
-#if 0
+#if 1
 		// 現在の画面(モード)の描画処理
 		switch (g_mode)
 		{
-		case MODE_TITLE:
-			DrawTitle();
-			break;
+		case MODE_EDITER:
 
-		case MODE_GAME:
-			DrawGame();
-			break;
+			DrawEditer();
 
-		case MODE_RESULT:
-			DrawResult();
-			break;
-
-		case MODE_GAMEOVER:
-			DrawGameover();
-			break;
-
-		case MODE_GAMECLEAR:
-			DrawGameclear();
-			break;
-
-		case MODE_CREDIT:
-			DrawCredit();
 			break;
 		}
 
-		// フェードの描画処理
-		DrawFade();
+		//// フェードの描画処理
+		//DrawFade();
 #endif
 
 #ifdef _DEBUG
@@ -675,10 +657,6 @@ void Draw(void)
 		DrawDebug();
 
 #endif // _DEBUG
-
-
-		DrawBlock();
-		DrawPlayer();
 
 		// 描画終了
 		g_pD3DDevice->EndScene();
@@ -694,39 +672,17 @@ LPDIRECT3DDEVICE9 GetDevice(void)
 	return g_pD3DDevice;
 }
 
-#if 0
+#if 1
 // 画面の設定
 void SetMode(MODE mode)
 {
 	// 現在の画面(モード)の終了
 	switch (g_mode)
 	{
-	case MODE_TITLE:
-		UninitTitle();
-		AddFunctionLog("END : Title Uninit");
-		break;
+	case MODE_EDITER:
 
-	case MODE_GAME:
-		UninitGame();
-		AddFunctionLog("END : Game Uninit");
-		break;
+		UninitEditer();
 
-	case MODE_RESULT:
-		UninitResult();
-		AddFunctionLog("END : Result Uninit");
-		break;
-
-	case MODE_GAMEOVER:
-		UninitGameover();
-		AddFunctionLog("END : Gameover Uninit");
-		break;
-
-	case MODE_GAMECLEAR:
-		UninitGameclear();
-		break;
-
-	case MODE_CREDIT:
-		UninitCredit();
 		break;
 	}
 
@@ -736,48 +692,20 @@ void SetMode(MODE mode)
 	// 指定の画面(モード)の初期化処理
 	switch (mode)
 	{
-	case MODE_TITLE:
-		InitTitle();
-		AddFunctionLog("END : Title Init");
-		break;
+	case MODE_EDITER:
 
-	case MODE_GAME:
-		InitGame(g_Difficulty);
-		AddFunctionLog("END : Game Init");
-		break;
+		InitEditer();
 
-	case MODE_RESULT:
-		InitResult();
-		AddFunctionLog("END : Result Init");
-		break;
-
-	case MODE_GAMEOVER:
-		InitGameover();
-		AddFunctionLog("END : Gameover Init");
-		break;
-
-	case MODE_GAMECLEAR:
-		InitGameclear();
-		break;
-
-	case MODE_CREDIT:
-		InitCredit();
 		break;
 	}
 
-	AddFunctionLog("END : Mode Set");
-
 	// モードを保存
 	g_mode = mode;
-
-	AddFunctionLog("END : Mode Save");
 }
 
 // 現在のモードを取得
 MODE GetMode(void)
 {
-	AddFunctionLog("END : Mode Get");
-
 	return g_mode;
 }
 
@@ -786,6 +714,7 @@ MODE GetModeExac(void)
 {
 	return g_modeExac;
 }
+#endif
 
 // 獲得済みウィンドウの取得
 HRESULT GetHandleWindow(HWND* phWnd)
@@ -801,7 +730,7 @@ HRESULT GetHandleWindow(HWND* phWnd)
 		return E_FAIL;
 	}
 }
-#endif
+
 
 // デバッグ表示
 void DrawDebug(void)
@@ -863,4 +792,12 @@ void SetGameDifficulty(GAMEDIFFICULTY difficulty)
 GAMEDIFFICULTY GetGameDifficulty(void)
 {
 	return g_Difficulty;
+}
+
+//================================================
+// --- ファイル名取得処理 ---
+//================================================
+TCHAR *GetFileName(void)
+{
+	return &g_szFileTitle[0];
 }

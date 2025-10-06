@@ -19,7 +19,7 @@
 typedef struct
 {
 	D3DXVECTOR3 pos;		// 位置
-	D3DXVECTOR3 posOld;		// 過去の位置
+	D3DXCOLOR col;			// 色
 	float fWidth;			// 幅
 	float fHeight;			// 高さ
 	bool bUse;				// 使用しているか
@@ -34,7 +34,8 @@ void UpdateEditer(void);							// 更新
 void DrawEditer(void);								// 描画
 			
 void SetEnableDebugPlay(bool bUse);					// デバッグプレイの有効化
+void SetEnableChanged(bool bChanged);				// データの変化
 BLOCKFROMEDIT *GetEditerInfo(void);					// エディタにて設置したブロックの情報
-void SetBlockFromFile(BLOCKFROMEDIT *pbfeBlock);	// ファイルから読み込んだブロックの設置
+
 
 #endif

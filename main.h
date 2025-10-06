@@ -52,13 +52,7 @@
 //**********************************************************************************
 typedef enum
 {
-	MODE_TITLE = 0,			// タイトル画面
-	MODE_TUTORIAL,			// チュートリアル付きゲーム画面
-	MODE_GAME,				// ゲーム画面
-	MODE_RESULT,			// リザルト画面
-	MODE_GAMEOVER,			// ゲームオーバー画面
-	MODE_GAMECLEAR,			// ゲームクリア画面
-	MODE_CREDIT,			// クレジット画面
+	MODE_EDITER = 0,			// エディタ画面
 	MODE_MAX
 }MODE;
 
@@ -94,5 +88,6 @@ MODE GetModeExac(void);
 HRESULT GetHandleWindow(HWND *phWnd);
 void SetGameDifficulty(GAMEDIFFICULTY difficulty);
 GAMEDIFFICULTY GetGameDifficulty(void);
+TCHAR *GetFileName(void);
 
 #endif

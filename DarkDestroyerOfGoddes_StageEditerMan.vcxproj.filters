@@ -68,4 +68,15 @@
       <Filter>リソース ファイル</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\icon\icon1.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="data\icon\Stage_aditer_icon.png">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="data\icon\Stage_aditer_icon.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

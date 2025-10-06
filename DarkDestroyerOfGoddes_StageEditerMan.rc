@@ -58,12 +58,32 @@ BEGIN
         POPUP "保存(&S)"
         BEGIN
             MENUITEM "名前を付けて保存(&N)",                ID_NAMEDSAVE
-            MENUITEM "上書き保存(&S)",                   ID_UPDATESAVE
+            MENUITEM "上書き保存(&S)",                   ID_UPDATESAVE, GRAYED
         END
         MENUITEM "開く(&O)",                      ID_OPENFILE
     END
     MENUITEM "バージョン情報(&V)",                 ID_VERSION
 END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "data\\icon\\Stage_aditer_icon.ico"
+
+IDI_ICON2               ICON                    "data\\icon\\Stage_aditer_icon.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDB_PNG1                PNG                     "data\\icon\\Stage_aditer_icon.png"
 
 #endif    // 日本語 (日本) resources
 /////////////////////////////////////////////////////////////////////////////

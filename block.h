@@ -9,10 +9,12 @@
 
 #include "main.h"
 #include "player.h"
+#include "editer.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
+#define MAX_BLOCK		(128)		// ブロックの最大数
 
 //**********************************************************************************
 //*** ブロック構造体 ***
@@ -21,9 +23,9 @@ typedef struct
 {
 	D3DXVECTOR3 pos;		// 位置
 	D3DXVECTOR3 posOld;		// 過去の位置
+	D3DXCOLOR col;			// 色
 	float fWidth;			// 幅
 	float fHeight;			// 高さ
-	D3DXCOLOR col;			//色
 	bool bUse;				// 使用しているか
 }BLOCK;
 
@@ -41,5 +43,6 @@ BLOCK *GetBlock(void);
 int GetCollison(void);
 int GetSelectNumber(void);
 int GetBlockMax(void);								// エディタにて設置したブロックの数
+void SetBlockFromFile(BLOCKFROMEDIT *pbfeBlock);	// ファイルから読み込んだブロックの設置
 
 #endif // !_BLOCK_H_
