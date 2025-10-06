@@ -35,7 +35,6 @@ void DrawEditer(void);								// 描画
 			
 void SetEnableDebugPlay(bool bUse);					// デバッグプレイの有効化
 BLOCKFROMEDIT *GetEditerInfo(void);					// エディタにて設置したブロックの情報
-int GetBlockMax(void);								// エディタにて設置したブロックの数
 void SetBlockFromFile(BLOCKFROMEDIT *pbfeBlock);	// ファイルから読み込んだブロックの設置
 
 #endif

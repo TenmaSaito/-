@@ -23,6 +23,7 @@ typedef struct
 	D3DXVECTOR3 posOld;		// 過去の位置
 	float fWidth;			// 幅
 	float fHeight;			// 高さ
+	D3DXCOLOR col;			//色
 	bool bUse;				// 使用しているか
 }BLOCK;
 
@@ -34,10 +35,11 @@ void UninitBlock(void);
 void UpdateBlock(void);
 void DrawBlock(void);
 bool CollisionBlock(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove, float fHeight, float fWidth, OR_GRAVITY gravity);
-void CheckBlockMove(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, float fHeight, float fWidth);
 
 void SetBlock(D3DXVECTOR3 pos, float fWidth, float fHeight);
 BLOCK *GetBlock(void);
 int GetCollison(void);
+int GetSelectNumber(void);
+int GetBlockMax(void);								// エディタにて設置したブロックの数
 
 #endif // !_BLOCK_H_

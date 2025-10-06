@@ -19,6 +19,8 @@ LPDIRECT3DTEXTURE9		g_pTextureBlock = NULL;	// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffBlock = NULL;	// 頂点バッファのポインタ
 BLOCK g_aBlock[MAX_BLOCK] = {};					// ブロックの情報
 int g_nCheckCollision;
+int g_nSelectBlock;								//選択中のブロック
+int g_nCounterBlock;							//生成されたブロックの数
 
 //================================================================================================================
 // --- ブロックの初期化 ---
@@ -29,6 +31,7 @@ void InitBlock(void)
 	VERTEX_2D* pVtx = NULL;							// 頂点情報へのポインタ
 	int nCntBlock = 0;
 	g_nCheckCollision = 0;
+	g_nSelectBlock = 0;
 
 	for (nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
@@ -69,6 +72,8 @@ void InitBlock(void)
 
 	for (nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
+		g_aBlock[nCntBlock].col = D3DXCOLOR_NULL;
+
 		/*** 頂点座標の設定の設定 ***/
 		pVtx[0].pos.x = g_aBlock[nCntBlock].pos.x;
 		pVtx[0].pos.y = g_aBlock[nCntBlock].pos.y;
@@ -93,10 +98,10 @@ void InitBlock(void)
 		pVtx[3].rhw = 1.0f;
 
 		/*** 頂点カラー設定 ***/
-		pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 255);
-		pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 255);
-		pVtx[2].col = D3DCOLOR_RGBA(255, 255, 255, 255);
-		pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 255);
+		pVtx[0].col = g_aBlock[nCntBlock].col;
+		pVtx[1].col = g_aBlock[nCntBlock].col;
+		pVtx[2].col = g_aBlock[nCntBlock].col;
+		pVtx[3].col = g_aBlock[nCntBlock].col;
 
 		/*** テクスチャ座標の設定 ***/
 		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
@@ -151,38 +156,69 @@ void UpdateBlock(void)
 
 	if (GetKeyboardRepeat(DIK_O))
 	{
-		g_aBlock[0].fHeight += 1.0f;
+		g_aBlock[g_nSelectBlock].fHeight += 1.0f;
 	}
 	else if (GetKeyboardRepeat(DIK_U))
 	{
-		g_aBlock[0].fHeight -= 1.0f;
+		g_aBlock[g_nSelectBlock].fHeight -= 1.0f;
 	}
 
 	if (GetKeyboardRepeat(DIK_M))
 	{
-		g_aBlock[0].fWidth += 1.0f;
+		g_aBlock[g_nSelectBlock].fWidth += 1.0f;
 	}
 	else if (GetKeyboardRepeat(DIK_N))
 	{
-		g_aBlock[0].fWidth -= 1.0f;
+		g_aBlock[g_nSelectBlock].fWidth -= 1.0f;
 	}
 
 	if (GetKeyboardRepeat(DIK_I))
 	{
-		g_aBlock[0].pos.y -= 1.0f;
+		g_aBlock[g_nSelectBlock].pos.y -= 1.0f;
 	}
 	else if (GetKeyboardRepeat(DIK_K))
 	{
-		g_aBlock[0].pos.y += 1.0f;
+		g_aBlock[g_nSelectBlock].pos.y += 1.0f;
 	}
 
 	if (GetKeyboardRepeat(DIK_J))
 	{
-		g_aBlock[0].pos.x -= 1.0f;
+		g_aBlock[g_nSelectBlock].pos.x -= 1.0f;
 	}
 	else if (GetKeyboardRepeat(DIK_L))
 	{
-		g_aBlock[0].pos.x += 1.0f;
+		g_aBlock[g_nSelectBlock].pos.x += 1.0f;
+	}
+	else if (GetKeyboardRepeat(DIK_RETURN))
+	{
+		SetBlock(g_aBlock[g_nSelectBlock].pos, g_aBlock[0].fWidth, g_aBlock[0].fHeight);
+	}
+	else if (GetKeyboardRepeat(DIK_UP))
+	{
+		if (g_nCounterBlock - 1 > g_nSelectBlock)
+		{
+			g_nSelectBlock++;
+		}
+		else if(g_nSelectBlock == g_nCounterBlock -1)
+		{
+			g_nSelectBlock = 0;
+		}
+
+	}
+	else if (GetKeyboardRepeat(DIK_DOWN))
+	{
+		if (g_nSelectBlock > 0)
+		{
+			g_nSelectBlock--;
+		}
+		else if (g_nSelectBlock == 0)
+		{
+			g_nSelectBlock = g_nCounterBlock;
+		}
+	}
+	else if (GetKeyboardRepeat(DIK_BACK))
+	{
+
 	}
 
 	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
@@ -205,6 +241,21 @@ void UpdateBlock(void)
 			pVtx[3].pos.x = g_aBlock[nCntBlock].pos.x + (g_aBlock[nCntBlock].fWidth);
 			pVtx[3].pos.y = g_aBlock[nCntBlock].pos.y + (g_aBlock[nCntBlock].fHeight);
 			pVtx[3].pos.z = 0.0f;
+
+			if (g_nSelectBlock == nCntBlock)
+			{
+				g_aBlock[nCntBlock].col = D3DXCOLOR(0, 0, 255,1.0f);
+			}
+			else if (g_nSelectBlock != nCntBlock)
+			{
+				g_aBlock[nCntBlock].col = D3DXCOLOR_NULL;
+			}
+
+
+			pVtx[0].col = g_aBlock[nCntBlock].col;
+			pVtx[1].col = g_aBlock[nCntBlock].col;
+			pVtx[2].col = g_aBlock[nCntBlock].col;
+			pVtx[3].col = g_aBlock[nCntBlock].col;
 		}
 
 		pVtx += 4;
@@ -392,6 +443,7 @@ void SetBlock(D3DXVECTOR3 pos, float fWidth, float fHeight)
 	{
 		if (g_aBlock[nCntBlock].bUse != true)
 		{
+			g_nCounterBlock++;
 			g_aBlock[nCntBlock].pos = pos;
 			g_aBlock[nCntBlock].fWidth = fWidth;
 			g_aBlock[nCntBlock].fHeight = fHeight;
@@ -408,18 +460,21 @@ BLOCK *GetBlock(void)
 	return &g_aBlock[0];
 }
 
-void CheckBlockMove(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, float fHeight, float fWidth)
-{
-	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
-	{
-		if (g_aBlock[nCntBlock].bUse == true)
-		{
-			
-		}
-	}
-}
-
 int GetCollison(void)
 {
 	return g_nCheckCollision;
 }
+
+int GetSelectNumber(void)
+{
+	return g_nSelectBlock;
+}
+//================================================================================================================
+// --- 設置したブロックの数の取得 ---
+//================================================================================================================
+int GetBlockMax(void)
+{
+	return g_nCounterBlock;
+}
+
+//消せるようにする,ブロックの選択,移動速度
