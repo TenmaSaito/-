@@ -22,6 +22,8 @@ int g_nCheckCollision;
 int g_nSelectBlock;								//選択中のブロック
 int g_nCounterBlock;							//生成されたブロックの数
 bool g_bChangedBlock;							// ブロックの情報が変化したか
+int g_nblinkCounter;							//点滅カウンタ
+bool g_bBlink;									//点滅切り替え
 
 //================================================================================================================
 // --- ブロックの初期化 ---
@@ -34,6 +36,9 @@ void InitBlock(void)
 	g_nCheckCollision = 0;
 	g_nSelectBlock = 0;
 	g_bChangedBlock = false;
+	g_nCounterBlock = 0;
+	g_nblinkCounter = 0;
+	g_bBlink = true;
 
 	for (nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
@@ -199,15 +204,19 @@ void UpdateBlock(void)
 	}
 	else if (GetKeyboardRepeat(DIK_RETURN))
 	{
+		g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
 		SetBlock(g_aBlock[g_nSelectBlock].pos, g_aBlock[0].fWidth, g_aBlock[0].fHeight);
+		g_nCounterBlock++;
+		g_nSelectBlock = g_nCounterBlock;
+
 	}
 	else if (GetKeyboardRepeat(DIK_UP))
 	{
-		if (g_nCounterBlock - 1 > g_nSelectBlock)
+		if (g_nCounterBlock > g_nSelectBlock)
 		{
 			g_nSelectBlock++;
 		}
-		else if(g_nSelectBlock == g_nCounterBlock -1)
+		else if (g_nCounterBlock == g_nSelectBlock)
 		{
 			g_nSelectBlock = 0;
 		}
@@ -226,7 +235,41 @@ void UpdateBlock(void)
 	}
 	else if (GetKeyboardRepeat(DIK_BACK))
 	{
+		if (g_nSelectBlock < g_nCounterBlock)
+		{
+			for (int nCnt = g_nSelectBlock; nCnt < g_nCounterBlock; nCnt++)
+			{
+				//一つ後ろのブロック情報を格納
+				g_aBlock[nCnt].pos = g_aBlock[nCnt + 1].pos;
+				g_aBlock[nCnt].posOld = g_aBlock[nCnt + 1].posOld;
+				g_aBlock[nCnt].fWidth = g_aBlock[nCnt + 1].fWidth;
+				g_aBlock[nCnt].fHeight = g_aBlock[nCnt + 1].fHeight;
+				g_aBlock[nCnt].col = g_aBlock[nCnt + 1].col;
+			}
+			g_aBlock[g_nCounterBlock].pos = D3DXVECTOR3_NULL;
+			g_aBlock[g_nCounterBlock].posOld = D3DXVECTOR3_NULL;
+			g_aBlock[g_nCounterBlock].fWidth = 0.0f;
+			g_aBlock[g_nCounterBlock].fHeight = 0.0f;
+			g_aBlock[g_nCounterBlock].col = D3DXCOLOR_NULL;
+			g_aBlock[g_nCounterBlock].bUse = false;
+			g_nCounterBlock--;
+			g_nSelectBlock = g_nCounterBlock;
+		}
+	}
 
+	//生成前ブロック点滅
+	g_nblinkCounter++;
+	if ((g_nblinkCounter % 30) == 0)
+	{
+		g_bBlink = g_bBlink ^ true;
+		if (g_bBlink == true)
+		{
+			g_aBlock[g_nCounterBlock].col.a = 0.0f;
+		}
+		else
+		{
+			g_aBlock[g_nCounterBlock].col.a = 1.0f;
+		}
 	}
 
 	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
@@ -314,6 +357,12 @@ void DrawBlock(void)
 				4 * nCntBlock,								// 描画する最初の頂点インデックス
 				2);											// 描画するプリミティブの数
 		}
+
+		//選択中のブロック再描画
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+			4 * g_nSelectBlock,								// 描画する最初の頂点インデックス
+			2);											// 描画するプリミティブの数
+
 	}
 }
 
@@ -466,11 +515,11 @@ void SetBlock(D3DXVECTOR3 pos, float fWidth, float fHeight)
 	{
 		if (g_aBlock[nCntBlock].bUse != true)
 		{
-			g_nCounterBlock++;
 			g_aBlock[nCntBlock].pos = pos;
 			g_aBlock[nCntBlock].posOld = pos;
 			g_aBlock[nCntBlock].fWidth = fWidth;
 			g_aBlock[nCntBlock].fHeight = fHeight;
+			g_aBlock[nCntBlock].col = D3DXCOLOR_NULL;
 
 			g_aBlock[nCntBlock].bUse = true;
 
