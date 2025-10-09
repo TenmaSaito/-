@@ -10,6 +10,22 @@
 //*************************************************************************************************
 //*** マクロ定義 ***
 //*************************************************************************************************
+#define EDITBLOCK_UP				DIK_I					// エディタブロックを上にずらす
+#define EDITBLOCK_DOWN				DIK_K					// エディタブロックを下にずらす
+#define EDITBLOCK_LEFT				DIK_J					// エディタブロックを左にずらす
+#define EDITBLOCK_RIGHT				DIK_L					// エディタブロックを右にずらす
+#define EDITBLOCK_WIDTH_UP			DIK_M					// エディタブロックを右に伸ばす
+#define EDITBLOCK_WIDTH_DOWN		DIK_N					// エディタブロックを左に縮める
+#define EDITBLOCK_HEIGHT_UP			DIK_O					// エディタブロックを下に伸ばす
+#define EDITBLOCK_HEIGHT_DOWN		DIK_U					// エディタブロックを上に縮める
+#define SELECTBLOCK_UP				DIK_T					// 選択しているブロックを上にずらす
+#define SELECTBLOCK_DOWN			DIK_G					// 選択しているブロックを下にずらす
+#define SELECTBLOCK_LEFT			DIK_F					// 選択しているブロックを左にずらす
+#define SELECTBLOCK_RIGHT			DIK_H					// 選択しているブロックを右にずらす
+#define SELECTBLOCK_NEXT			DIK_UP					// 選択番号を一つ次にずらす
+#define SELECTBLOCK_LAST			DIK_DOWN				// 選択番号を一つ前に戻す
+#define EDITBLOCK_CREATE			DIK_RETURN				// エディタブロックの位置にエディタブロックの状態のブロックを配置する
+#define SELECTBLOCK_DELETE			DIK_BACK				// 選択しているブロックを消す
 
 //*************************************************************************************************
 //*** グローバル変数 ***
@@ -50,12 +66,18 @@ void InitBlock(void)
 		g_aBlock[nCntBlock].bUse = g_aBlockDoppel[nCntBlock].bUse = false;
 	}
 
-	SetBlock(D3DXVECTOR3(200.0f, 670.0f, 0.0f), 50.0f, 50.0f);
-	g_aBlockDoppel[0].pos = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
-	g_aBlockDoppel[0].posOld = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
-	g_aBlockDoppel[0].fHeight = 50.0f;
-	g_aBlockDoppel[0].fWidth = 50.0f;
-	g_aBlockDoppel[0].bUse = true;
+	//SetBlock(D3DXVECTOR3(200.0f, 670.0f, 0.0f), 50.0f, 50.0f);
+	g_aBlock[EDITBLOCK_NUMBER].pos = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
+	g_aBlock[EDITBLOCK_NUMBER].posOld = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
+	g_aBlock[EDITBLOCK_NUMBER].fHeight = 50.0f;
+	g_aBlock[EDITBLOCK_NUMBER].fWidth = 50.0f;
+	g_aBlock[EDITBLOCK_NUMBER].bUse = true;
+	g_nCounterBlock++;
+	g_aBlockDoppel[EDITBLOCK_NUMBER].pos = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
+	g_aBlockDoppel[EDITBLOCK_NUMBER].posOld = D3DXVECTOR3(200.0f, 670.0f, 0.0f);
+	g_aBlockDoppel[EDITBLOCK_NUMBER].fHeight = 50.0f;
+	g_aBlockDoppel[EDITBLOCK_NUMBER].fWidth = 50.0f;
+	g_aBlockDoppel[EDITBLOCK_NUMBER].bUse = true;
 
 /*
 	SetBlock(D3DXVECTOR3(200.0f, 620.0f, 0.0f), 50.0f, 50.0f);
@@ -167,98 +189,132 @@ void UpdateBlock(void)
 	/*** 頂点バッファの設定 ***/
 	g_pVtxBuffBlock->Lock(0, 0, (void**)&pVtx, 0);
 
-	if (GetKeyboardRepeat(DIK_O))
+	if (GetKeyboardRepeat(EDITBLOCK_HEIGHT_UP))
 	{
-		g_aBlock[g_nSelectBlock].fHeight += 1.0f;
+		g_aBlock[EDITBLOCK_NUMBER].fHeight += 1.0f;
 	}
-	else if (GetKeyboardRepeat(DIK_U))
+	else if (GetKeyboardRepeat(EDITBLOCK_HEIGHT_DOWN))
 	{
-		g_aBlock[g_nSelectBlock].fHeight -= 1.0f;
-	}
-
-	if (GetKeyboardRepeat(DIK_M))
-	{
-		g_aBlock[g_nSelectBlock].fWidth += 1.0f;
-	}
-	else if (GetKeyboardRepeat(DIK_N))
-	{
-		g_aBlock[g_nSelectBlock].fWidth -= 1.0f;
+		g_aBlock[EDITBLOCK_NUMBER].fHeight -= 1.0f;
 	}
 
-	if (GetKeyboardRepeat(DIK_I))
+	if (GetKeyboardRepeat(EDITBLOCK_WIDTH_UP))
 	{
-		g_aBlock[g_nSelectBlock].pos.y -= 1.0f;
+		g_aBlock[EDITBLOCK_NUMBER].fWidth += 1.0f;
 	}
-	else if (GetKeyboardRepeat(DIK_K))
+	else if (GetKeyboardRepeat(EDITBLOCK_WIDTH_DOWN))
 	{
-		g_aBlock[g_nSelectBlock].pos.y += 1.0f;
+		g_aBlock[EDITBLOCK_NUMBER].fWidth -= 1.0f;
 	}
 
-	if (GetKeyboardRepeat(DIK_J))
+	if (GetKeyboardRepeat(EDITBLOCK_UP))
 	{
-		g_aBlock[g_nSelectBlock].pos.x -= 1.0f;
+		g_aBlock[EDITBLOCK_NUMBER].pos.y -= 1.0f;
 	}
-	else if (GetKeyboardRepeat(DIK_L))
+	else if (GetKeyboardRepeat(EDITBLOCK_DOWN))
 	{
-		g_aBlock[g_nSelectBlock].pos.x += 1.0f;
+		g_aBlock[EDITBLOCK_NUMBER].pos.y += 1.0f;
 	}
-	else if (GetKeyboardRepeat(DIK_RETURN))
+
+	if (GetKeyboardRepeat(EDITBLOCK_LEFT))
 	{
-		g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
-		SetBlock(g_aBlock[g_nSelectBlock].pos, g_aBlock[0].fWidth, g_aBlock[0].fHeight);
-		g_nCounterBlock++;
-		g_nSelectBlock = g_nCounterBlock;
+		g_aBlock[EDITBLOCK_NUMBER].pos.x -= 1.0f;
+	}
+	else if (GetKeyboardRepeat(EDITBLOCK_RIGHT))
+	{
+		g_aBlock[EDITBLOCK_NUMBER].pos.x += 1.0f;
+	}
+	
+	if (GetKeyboardRepeat(EDITBLOCK_CREATE))
+	{
+		//g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
+		SetBlock(g_aBlock[EDITBLOCK_NUMBER].pos, g_aBlock[EDITBLOCK_NUMBER].fWidth, g_aBlock[EDITBLOCK_NUMBER].fHeight);
+		g_nSelectBlock = g_nCounterBlock - 1;
 
 	}
-	else if (GetKeyboardRepeat(DIK_UP))
+	
+	if (GetKeyboardRepeat(SELECTBLOCK_NEXT) && g_nCounterBlock > 1)
 	{
-		if (g_nCounterBlock > g_nSelectBlock)
+		if ((g_nCounterBlock - 1) > g_nSelectBlock)
 		{
 			g_nSelectBlock++;
 		}
-		else if (g_nCounterBlock == g_nSelectBlock)
+		else if ((g_nCounterBlock - 1) == g_nSelectBlock)
 		{
-			g_nSelectBlock = 0;
+			g_nSelectBlock = EDITBLOCK_NUMBER + 1;
 		}
-
 	}
-	else if (GetKeyboardRepeat(DIK_DOWN))
+	else if (GetKeyboardRepeat(SELECTBLOCK_LAST) && g_nCounterBlock > 1)
 	{
-		if (g_nSelectBlock > 0)
+		g_nSelectBlock--;
+
+		if (g_nSelectBlock > (EDITBLOCK_NUMBER))
 		{
-			g_nSelectBlock--;
+			
 		}
-		else if (g_nSelectBlock == 0)
+		else if (g_nSelectBlock == EDITBLOCK_NUMBER)
 		{
-			g_nSelectBlock = g_nCounterBlock;
+			g_nSelectBlock = (g_nCounterBlock - 1);
 		}
 	}
-	else if (GetKeyboardRepeat(DIK_BACK))
+	else if (GetKeyboardRepeat(SELECTBLOCK_DELETE) && g_nCounterBlock > 1)
 	{
 		if (g_nSelectBlock < g_nCounterBlock)
 		{
-			for (int nCnt = g_nSelectBlock; nCnt < g_nCounterBlock; nCnt++)
-			{
-				//一つ後ろのブロック情報を格納
-				g_aBlock[nCnt].pos = g_aBlock[nCnt + 1].pos;
-				g_aBlock[nCnt].posOld = g_aBlock[nCnt + 1].posOld;
-				g_aBlock[nCnt].fWidth = g_aBlock[nCnt + 1].fWidth;
-				g_aBlock[nCnt].fHeight = g_aBlock[nCnt + 1].fHeight;
-				g_aBlock[nCnt].col = g_aBlock[nCnt + 1].col;
-			}
-			g_aBlock[g_nCounterBlock].pos = D3DXVECTOR3_NULL;
-			g_aBlock[g_nCounterBlock].posOld = D3DXVECTOR3_NULL;
-			g_aBlock[g_nCounterBlock].fWidth = 0.0f;
-			g_aBlock[g_nCounterBlock].fHeight = 0.0f;
-			g_aBlock[g_nCounterBlock].col = D3DXCOLOR_NULL;
-			g_aBlock[g_nCounterBlock].bUse = false;
+			g_aBlock[g_nSelectBlock].pos = D3DXVECTOR3_NULL;
+			g_aBlock[g_nSelectBlock].posOld = D3DXVECTOR3_NULL;
+			g_aBlock[g_nSelectBlock].fWidth = 0.0f;
+			g_aBlock[g_nSelectBlock].fHeight = 0.0f;
+			g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
+			g_aBlock[g_nSelectBlock].bUse = false;
 			g_nCounterBlock--;
-			g_nSelectBlock = g_nCounterBlock;
+
+			if (g_nCounterBlock < 2)
+			{
+				g_nSelectBlock = 0;
+			}
+			else
+			{
+				for (int nCnt = g_nSelectBlock; nCnt < g_nCounterBlock; nCnt++)
+				{
+					//一つ後ろのブロック情報を格納
+					g_aBlock[nCnt].pos = g_aBlock[nCnt + 1].pos;
+					g_aBlock[nCnt].posOld = g_aBlock[nCnt + 1].posOld;
+					g_aBlock[nCnt].fWidth = g_aBlock[nCnt + 1].fWidth;
+					g_aBlock[nCnt].fHeight = g_aBlock[nCnt + 1].fHeight;
+					g_aBlock[nCnt].col = g_aBlock[nCnt + 1].col;
+					g_aBlock[nCnt].bUse = true;
+					g_aBlock[nCnt + 1].bUse = false;
+				}
+
+				g_nSelectBlock = g_nCounterBlock - 1;
+			}
+		}
+	}
+
+	if (g_nCounterBlock > 1)
+	{
+		if (GetKeyboardRepeat(SELECTBLOCK_UP))
+		{
+			g_aBlock[g_nSelectBlock].pos.y -= 1.0f;
+		}
+		else if (GetKeyboardRepeat(SELECTBLOCK_DOWN))
+		{
+			g_aBlock[g_nSelectBlock].pos.y += 1.0f;
+		}
+
+		if (GetKeyboardRepeat(SELECTBLOCK_LEFT))
+		{
+			g_aBlock[g_nSelectBlock].pos.x -= 1.0f;
+		}
+		else if (GetKeyboardRepeat(SELECTBLOCK_RIGHT))
+		{
+			g_aBlock[g_nSelectBlock].pos.x += 1.0f;
 		}
 	}
 
 	//生成前ブロック点滅
-	g_nblinkCounter++;
+	/*g_nblinkCounter++;
 	if ((g_nblinkCounter % 30) == 0)
 	{
 		g_bBlink = g_bBlink ^ true;
@@ -270,7 +326,7 @@ void UpdateBlock(void)
 		{
 			g_aBlock[g_nCounterBlock].col.a = 1.0f;
 		}
-	}
+	}*/
 
 	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
@@ -308,14 +364,21 @@ void UpdateBlock(void)
 			pVtx[3].pos.y = g_aBlock[nCntBlock].pos.y + (g_aBlock[nCntBlock].fHeight);
 			pVtx[3].pos.z = 0.0f;
 
-			if (g_nSelectBlock == nCntBlock)
+			if (nCntBlock == EDITBLOCK_NUMBER)
 			{
 				pVtx[0].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
 				pVtx[1].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
 				pVtx[2].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
 				pVtx[3].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
 			}
-			else if (g_nSelectBlock != nCntBlock)
+			else if(nCntBlock == g_nSelectBlock)
+			{
+				pVtx[0].col = D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f);
+				pVtx[1].col = D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f);
+				pVtx[2].col = D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f);
+				pVtx[3].col = D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f);
+			}
+			else
 			{
 				pVtx[0].col = g_aBlock[nCntBlock].col;
 				pVtx[1].col = g_aBlock[nCntBlock].col;
@@ -511,7 +574,7 @@ bool CollisionBlock(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove,
 
 void SetBlock(D3DXVECTOR3 pos, float fWidth, float fHeight)
 {
-	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
+	for (int nCntBlock = (EDITBLOCK_NUMBER + 1); nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
 		if (g_aBlock[nCntBlock].bUse != true)
 		{
@@ -520,6 +583,7 @@ void SetBlock(D3DXVECTOR3 pos, float fWidth, float fHeight)
 			g_aBlock[nCntBlock].fWidth = fWidth;
 			g_aBlock[nCntBlock].fHeight = fHeight;
 			g_aBlock[nCntBlock].col = D3DXCOLOR_NULL;
+			g_nCounterBlock++;
 
 			g_aBlock[nCntBlock].bUse = true;
 
@@ -559,7 +623,7 @@ void SetBlockFromFile(BLOCKFROMEDIT* pbfeBlock)
 	BLOCK *pBlock = &g_aBlock[0];
 	BLOCK *pBlockDoppel = &g_aBlockDoppel[0];
 
-	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++, pBlock++, pBlockDoppel++)
+	for (int nCntBlock = EDITBLOCK_NUMBER + 1; nCntBlock < MAX_BLOCK; nCntBlock++, pBlock++, pBlockDoppel++)
 	{ // 設定
 		if (pBlock->bUse == false)
 		{ // 使われていなければデータを保存、コピー作成
@@ -568,7 +632,8 @@ void SetBlockFromFile(BLOCKFROMEDIT* pbfeBlock)
 			pBlock->fWidth = pBlockDoppel->fWidth = pbfeBlock->fWidth;		// 横幅
 			pBlock->fHeight = pBlockDoppel->fHeight = pbfeBlock->fHeight;	// 縦幅
 			pBlock->bUse = pBlockDoppel->bUse = true;						// 使用済みに変更
-			g_nCounterBlock++;			// ポリゴンの数を増やす
+			g_nCounterBlock++;												// ポリゴンの数を増やす
+			g_nSelectBlock = 1;
 
 			break;
 		}

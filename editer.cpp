@@ -103,6 +103,16 @@ void UpdateEditer(void)
 			g_bChangedSave = true;
 		}
 	}
+
+	if (GetBlockMax() < 2)
+	{
+		EnableMenuItem(GetSubMenu(GetMenu(hWnd), 0), ID_NAMEDSAVE, MF_BYCOMMAND | MF_GRAYED);
+		EnableMenuItem(GetSubMenu(GetMenu(hWnd), 0), ID_UPDATESAVE, MF_BYCOMMAND | MF_GRAYED);
+	}
+	else
+	{
+		EnableMenuItem(GetSubMenu(GetMenu(hWnd), 0), ID_NAMEDSAVE, MF_BYCOMMAND | MF_ENABLED);
+	}
 }
 
 //================================================================================================================
@@ -141,7 +151,9 @@ BLOCKFROMEDIT *GetEditerInfo(void)
 	int nCntEditerMax = GetBlockMax();
 	BLOCK *pBlock = GetBlock();
 
-	for (int nCntEditer = 1; nCntEditer < nCntEditerMax; nCntEditer++, pBlock++)
+	pBlock += (EDITBLOCK_NUMBER + 1);
+
+	for (int nCntEditer = 0; nCntEditer < nCntEditerMax - 1; nCntEditer++, pBlock++)
 	{
 		if (pBlock->bUse == true)
 		{

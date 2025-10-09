@@ -269,7 +269,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-			nCntBlock = GetBlockMax();
+			nCntBlock = GetBlockMax() - 1;
 
 			fwrite(&nCntBlock, sizeof(int), 1, pFile);
 
@@ -324,7 +324,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					break;
 				}
 
-				nCntBlock = GetBlockMax();
+				nCntBlock = GetBlockMax() - 1;
 
 				fwrite(&nCntBlock, sizeof(int), 1, pFile);
 
@@ -740,7 +740,19 @@ void DrawDebug(void)
 
 	// 文字列に代入
 	wsprintf(&aStr[0][0], "FPS:%d\n", g_nCountFPS);
-	sprintf(&aStr[1][0], "U / O : 高さ変更 (%f) \nN / M : 幅変更 (%f)\njump %d\npos %f %f\nposOld %f %f\nBpos %f %f\nCollison %d\nSelectBlock %d", GetBlock()->fHeight, GetBlock()->fWidth, GetPlayer()->bJump, GetPlayer()->pos.x, GetPlayer()->pos.y, GetPlayer()->posOld.x, GetPlayer()->posOld.y, GetBlock()->pos.x, GetBlock()->pos.y, GetCollison(),GetSelectNumber());
+	sprintf(&aStr[1][0], "U / O : 高さ変更 (%f) \nN / M : 幅変更 (%f)\njump %d\npos %f %f\nposOld %f %f\nBpos %f %f\nCollison %d\nSelectBlock %d\nBlockNum %d", 
+		GetBlock()->fHeight,
+		GetBlock()->fWidth, 
+		GetPlayer()->bJump, 
+		GetPlayer()->pos.x, 
+		GetPlayer()->pos.y, 
+		GetPlayer()->posOld.x, 
+		GetPlayer()->posOld.y, 
+		GetBlock()->pos.x, 
+		GetBlock()->pos.y, 
+		GetCollison(),
+		GetSelectNumber(),
+		GetBlockMax());
 
 	strcat(&aStr[0][0], &aStr[1][0]);
 
