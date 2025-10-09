@@ -25,6 +25,12 @@
     <Filter Include="ヘッダー ファイル\editer">
       <UniqueIdentifier>{b9d7c0f2-6d71-42b4-ab2a-207ed95e7c5d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\rw">
+      <UniqueIdentifier>{ae7c8bc0-551b-4484-b925-4a211cfc8e98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\rw">
+      <UniqueIdentifier>{1aed43b0-f164-494c-9e18-cc8306c7dbdc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,6 +47,9 @@
     </ClCompile>
     <ClCompile Include="editer.cpp">
       <Filter>ソース ファイル\editer</Filter>
+    </ClCompile>
+    <ClCompile Include="binload.cpp">
+      <Filter>ソース ファイル\rw</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="editer.h">
       <Filter>ヘッダー ファイル\editer</Filter>
+    </ClInclude>
+    <ClInclude Include="binload.h">
+      <Filter>ヘッダー ファイル\rw</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

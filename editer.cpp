@@ -86,7 +86,7 @@ void UpdateEditer(void)
 		if (g_bChanged)
 		{
 			strcpy(szFileTitle, GetFileName());
-			if (strcmp(szFileTitle, "暗黒破壊神ステージエディタ―マン") != 0)
+			if (strcmp(szFileTitle, "暗黒破壊神ステージエディターマン") != 0)
 			{
 				EnableMenuItem(GetSubMenu(GetMenu(hWnd), 0), ID_UPDATESAVE, MF_BYCOMMAND | MF_ENABLED);
 				strcat(szFileTitle, "*");
@@ -141,7 +141,7 @@ BLOCKFROMEDIT *GetEditerInfo(void)
 	int nCntEditerMax = GetBlockMax();
 	BLOCK *pBlock = GetBlock();
 
-	for (int nCntEditer = 0; nCntEditer < nCntEditerMax; nCntEditer++, pBlock++)
+	for (int nCntEditer = 1; nCntEditer < nCntEditerMax; nCntEditer++, pBlock++)
 	{
 		if (pBlock->bUse == true)
 		{

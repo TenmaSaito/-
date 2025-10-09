@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="binload.cpp" />
     <ClCompile Include="block.cpp" />
     <ClCompile Include="editer.cpp" />
     <ClCompile Include="input.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="binload.h" />
     <ClInclude Include="block.h" />
     <ClInclude Include="editer.h" />
     <ClInclude Include="input.h" />
