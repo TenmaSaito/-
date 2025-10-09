@@ -34,6 +34,7 @@ void UpdateEditer(void);							// 更新
 void DrawEditer(void);								// 描画
 			
 void SetEnableDebugPlay(bool bUse);					// デバッグプレイの有効化
+bool GetDebugPlay(void);							// デバッグプレイ状態の取得
 void SetEnableChanged(bool bChanged);				// データの変化
 BLOCKFROMEDIT *GetEditerInfo(void);					// エディタにて設置したブロックの情報
 

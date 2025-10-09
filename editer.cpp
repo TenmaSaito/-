@@ -29,6 +29,8 @@ void InitEditer(void)
 {
 	g_bChanged = false;
 
+	g_bUseDebugPlay = false;
+
 	// 各cppの初期化
 	InitPlayer();
 
@@ -60,7 +62,11 @@ void UpdateEditer(void)
 	}
 
 	// 各cppの更新
-	UpdatePlayer();
+
+	if (g_bUseDebugPlay == true)
+	{// デバッグプレイモード中
+		UpdatePlayer();
+	}
 
 	UpdateBlock();
 
@@ -113,6 +119,16 @@ void UpdateEditer(void)
 	{
 		EnableMenuItem(GetSubMenu(GetMenu(hWnd), 0), ID_NAMEDSAVE, MF_BYCOMMAND | MF_ENABLED);
 	}
+
+	// デバッグプレイ状態の設定
+	if (GetKeyboardTrigger(DIK_F5) == true)
+	{
+		g_bUseDebugPlay = g_bUseDebugPlay ^ 1;
+		if (g_bUseDebugPlay == true)
+		{// デバッグプレイモードが開始されたら
+			InitPlayer();
+		}
+	}
 }
 
 //================================================================================================================
@@ -123,7 +139,10 @@ void DrawEditer(void)
 	// 各cppの描画
 	DrawBlock();
 
-	DrawPlayer();
+	if (g_bUseDebugPlay == true)
+	{// デバッグプレイモード中
+		DrawPlayer();
+	}
 }
 
 //================================================================================================================
@@ -132,6 +151,14 @@ void DrawEditer(void)
 void SetEnableDebugPlay(bool bUse)
 {
 	g_bUseDebugPlay = bUse;
+}
+
+//================================================================================================================
+// --- デバッグプレイ状態の取得 ---
+//================================================================================================================
+bool GetDebugPlay(void)
+{
+	return g_bUseDebugPlay;
 }
 
 //================================================================================================================

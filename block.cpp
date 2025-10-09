@@ -178,6 +178,17 @@ void UpdateBlock(void)
 {
 	VERTEX_2D* pVtx;
 
+	bool bUseDebugPlay = GetDebugPlay();		// デバッグプレイが有効か取得
+
+	if (bUseDebugPlay == true)
+	{// デバッグプレイ中
+		g_aBlock[EDITBLOCK_NUMBER].bUse = false;	// 選択ブロックの無効化
+	}
+	else
+	{
+		g_aBlock[EDITBLOCK_NUMBER].bUse = true;
+	}
+
 	for (int nCntBlock = 0; nCntBlock < MAX_BLOCK; nCntBlock++)
 	{
 		if (g_aBlock[nCntBlock].bUse == true)
@@ -189,127 +200,130 @@ void UpdateBlock(void)
 	/*** 頂点バッファの設定 ***/
 	g_pVtxBuffBlock->Lock(0, 0, (void**)&pVtx, 0);
 
-	if (GetKeyboardRepeat(EDITBLOCK_HEIGHT_UP))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].fHeight += 1.0f;
-	}
-	else if (GetKeyboardRepeat(EDITBLOCK_HEIGHT_DOWN))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].fHeight -= 1.0f;
-	}
-
-	if (GetKeyboardRepeat(EDITBLOCK_WIDTH_UP))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].fWidth += 1.0f;
-	}
-	else if (GetKeyboardRepeat(EDITBLOCK_WIDTH_DOWN))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].fWidth -= 1.0f;
-	}
-
-	if (GetKeyboardRepeat(EDITBLOCK_UP))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].pos.y -= 1.0f;
-	}
-	else if (GetKeyboardRepeat(EDITBLOCK_DOWN))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].pos.y += 1.0f;
-	}
-
-	if (GetKeyboardRepeat(EDITBLOCK_LEFT))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].pos.x -= 1.0f;
-	}
-	else if (GetKeyboardRepeat(EDITBLOCK_RIGHT))
-	{
-		g_aBlock[EDITBLOCK_NUMBER].pos.x += 1.0f;
-	}
-	
-	if (GetKeyboardRepeat(EDITBLOCK_CREATE))
-	{
-		//g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
-		SetBlock(g_aBlock[EDITBLOCK_NUMBER].pos, g_aBlock[EDITBLOCK_NUMBER].fWidth, g_aBlock[EDITBLOCK_NUMBER].fHeight);
-		g_nSelectBlock = g_nCounterBlock - 1;
-
-	}
-	
-	if (GetKeyboardRepeat(SELECTBLOCK_NEXT) && g_nCounterBlock > 1)
-	{
-		if ((g_nCounterBlock - 1) > g_nSelectBlock)
+	if (bUseDebugPlay != true)
+	{// デバッグプレイ中でないなら
+		if (GetKeyboardRepeat(EDITBLOCK_HEIGHT_UP))
 		{
-			g_nSelectBlock++;
+			g_aBlock[EDITBLOCK_NUMBER].fHeight += 1.0f;
 		}
-		else if ((g_nCounterBlock - 1) == g_nSelectBlock)
+		else if (GetKeyboardRepeat(EDITBLOCK_HEIGHT_DOWN))
 		{
-			g_nSelectBlock = EDITBLOCK_NUMBER + 1;
+			g_aBlock[EDITBLOCK_NUMBER].fHeight -= 1.0f;
 		}
-	}
-	else if (GetKeyboardRepeat(SELECTBLOCK_LAST) && g_nCounterBlock > 1)
-	{
-		g_nSelectBlock--;
 
-		if (g_nSelectBlock > (EDITBLOCK_NUMBER))
+		if (GetKeyboardRepeat(EDITBLOCK_WIDTH_UP))
 		{
-			
+			g_aBlock[EDITBLOCK_NUMBER].fWidth += 1.0f;
 		}
-		else if (g_nSelectBlock == EDITBLOCK_NUMBER)
+		else if (GetKeyboardRepeat(EDITBLOCK_WIDTH_DOWN))
 		{
-			g_nSelectBlock = (g_nCounterBlock - 1);
+			g_aBlock[EDITBLOCK_NUMBER].fWidth -= 1.0f;
 		}
-	}
-	else if (GetKeyboardRepeat(SELECTBLOCK_DELETE) && g_nCounterBlock > 1)
-	{
-		if (g_nSelectBlock < g_nCounterBlock)
-		{
-			g_aBlock[g_nSelectBlock].pos = D3DXVECTOR3_NULL;
-			g_aBlock[g_nSelectBlock].posOld = D3DXVECTOR3_NULL;
-			g_aBlock[g_nSelectBlock].fWidth = 0.0f;
-			g_aBlock[g_nSelectBlock].fHeight = 0.0f;
-			g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
-			g_aBlock[g_nSelectBlock].bUse = false;
-			g_nCounterBlock--;
 
-			if (g_nCounterBlock < 2)
+		if (GetKeyboardRepeat(EDITBLOCK_UP))
+		{
+			g_aBlock[EDITBLOCK_NUMBER].pos.y -= 1.0f;
+		}
+		else if (GetKeyboardRepeat(EDITBLOCK_DOWN))
+		{
+			g_aBlock[EDITBLOCK_NUMBER].pos.y += 1.0f;
+		}
+
+		if (GetKeyboardRepeat(EDITBLOCK_LEFT))
+		{
+			g_aBlock[EDITBLOCK_NUMBER].pos.x -= 1.0f;
+		}
+		else if (GetKeyboardRepeat(EDITBLOCK_RIGHT))
+		{
+			g_aBlock[EDITBLOCK_NUMBER].pos.x += 1.0f;
+		}
+
+		if (GetKeyboardRepeat(EDITBLOCK_CREATE))
+		{
+			//g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
+			SetBlock(g_aBlock[EDITBLOCK_NUMBER].pos, g_aBlock[EDITBLOCK_NUMBER].fWidth, g_aBlock[EDITBLOCK_NUMBER].fHeight);
+			g_nSelectBlock = g_nCounterBlock - 1;
+
+		}
+
+		if (GetKeyboardRepeat(SELECTBLOCK_NEXT) && g_nCounterBlock > 1)
+		{
+			if ((g_nCounterBlock - 1) > g_nSelectBlock)
 			{
-				g_nSelectBlock = 0;
+				g_nSelectBlock++;
 			}
-			else
+			else if ((g_nCounterBlock - 1) == g_nSelectBlock)
 			{
-				for (int nCnt = g_nSelectBlock; nCnt < g_nCounterBlock; nCnt++)
+				g_nSelectBlock = EDITBLOCK_NUMBER + 1;
+			}
+		}
+		else if (GetKeyboardRepeat(SELECTBLOCK_LAST) && g_nCounterBlock > 1)
+		{
+			g_nSelectBlock--;
+
+			if (g_nSelectBlock > (EDITBLOCK_NUMBER))
+			{
+
+			}
+			else if (g_nSelectBlock == EDITBLOCK_NUMBER)
+			{
+				g_nSelectBlock = (g_nCounterBlock - 1);
+			}
+		}
+		else if (GetKeyboardRepeat(SELECTBLOCK_DELETE) && g_nCounterBlock > 1)
+		{
+			if (g_nSelectBlock < g_nCounterBlock)
+			{
+				g_aBlock[g_nSelectBlock].pos = D3DXVECTOR3_NULL;
+				g_aBlock[g_nSelectBlock].posOld = D3DXVECTOR3_NULL;
+				g_aBlock[g_nSelectBlock].fWidth = 0.0f;
+				g_aBlock[g_nSelectBlock].fHeight = 0.0f;
+				g_aBlock[g_nSelectBlock].col = D3DXCOLOR_NULL;
+				g_aBlock[g_nSelectBlock].bUse = false;
+				g_nCounterBlock--;
+
+				if (g_nCounterBlock < 2)
 				{
-					//一つ後ろのブロック情報を格納
-					g_aBlock[nCnt].pos = g_aBlock[nCnt + 1].pos;
-					g_aBlock[nCnt].posOld = g_aBlock[nCnt + 1].posOld;
-					g_aBlock[nCnt].fWidth = g_aBlock[nCnt + 1].fWidth;
-					g_aBlock[nCnt].fHeight = g_aBlock[nCnt + 1].fHeight;
-					g_aBlock[nCnt].col = g_aBlock[nCnt + 1].col;
-					g_aBlock[nCnt].bUse = true;
-					g_aBlock[nCnt + 1].bUse = false;
+					g_nSelectBlock = 0;
 				}
+				else
+				{
+					for (int nCnt = g_nSelectBlock; nCnt < g_nCounterBlock; nCnt++)
+					{
+						//一つ後ろのブロック情報を格納
+						g_aBlock[nCnt].pos = g_aBlock[nCnt + 1].pos;
+						g_aBlock[nCnt].posOld = g_aBlock[nCnt + 1].posOld;
+						g_aBlock[nCnt].fWidth = g_aBlock[nCnt + 1].fWidth;
+						g_aBlock[nCnt].fHeight = g_aBlock[nCnt + 1].fHeight;
+						g_aBlock[nCnt].col = g_aBlock[nCnt + 1].col;
+						g_aBlock[nCnt].bUse = true;
+						g_aBlock[nCnt + 1].bUse = false;
+					}
 
-				g_nSelectBlock = g_nCounterBlock - 1;
+					g_nSelectBlock = g_nCounterBlock - 1;
+				}
 			}
 		}
-	}
 
-	if (g_nCounterBlock > 1)
-	{
-		if (GetKeyboardRepeat(SELECTBLOCK_UP))
+		if (g_nCounterBlock > 1)
 		{
-			g_aBlock[g_nSelectBlock].pos.y -= 1.0f;
-		}
-		else if (GetKeyboardRepeat(SELECTBLOCK_DOWN))
-		{
-			g_aBlock[g_nSelectBlock].pos.y += 1.0f;
-		}
+			if (GetKeyboardRepeat(SELECTBLOCK_UP))
+			{
+				g_aBlock[g_nSelectBlock].pos.y -= 1.0f;
+			}
+			else if (GetKeyboardRepeat(SELECTBLOCK_DOWN))
+			{
+				g_aBlock[g_nSelectBlock].pos.y += 1.0f;
+			}
 
-		if (GetKeyboardRepeat(SELECTBLOCK_LEFT))
-		{
-			g_aBlock[g_nSelectBlock].pos.x -= 1.0f;
-		}
-		else if (GetKeyboardRepeat(SELECTBLOCK_RIGHT))
-		{
-			g_aBlock[g_nSelectBlock].pos.x += 1.0f;
+			if (GetKeyboardRepeat(SELECTBLOCK_LEFT))
+			{
+				g_aBlock[g_nSelectBlock].pos.x -= 1.0f;
+			}
+			else if (GetKeyboardRepeat(SELECTBLOCK_RIGHT))
+			{
+				g_aBlock[g_nSelectBlock].pos.x += 1.0f;
+			}
 		}
 	}
 
@@ -364,7 +378,14 @@ void UpdateBlock(void)
 			pVtx[3].pos.y = g_aBlock[nCntBlock].pos.y + (g_aBlock[nCntBlock].fHeight);
 			pVtx[3].pos.z = 0.0f;
 
-			if (nCntBlock == EDITBLOCK_NUMBER)
+			if (bUseDebugPlay == true)
+			{// デバッグプレイ中
+				pVtx[0].col = g_aBlock[nCntBlock].col;
+				pVtx[1].col = g_aBlock[nCntBlock].col;
+				pVtx[2].col = g_aBlock[nCntBlock].col;
+				pVtx[3].col = g_aBlock[nCntBlock].col;
+			}
+			else if (nCntBlock == EDITBLOCK_NUMBER)
 			{
 				pVtx[0].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
 				pVtx[1].col = D3DXCOLOR(0, 0, 1.0f, 1.0f);
@@ -420,12 +441,6 @@ void DrawBlock(void)
 				4 * nCntBlock,								// 描画する最初の頂点インデックス
 				2);											// 描画するプリミティブの数
 		}
-
-		//選択中のブロック再描画
-		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
-			4 * g_nSelectBlock,								// 描画する最初の頂点インデックス
-			2);											// 描画するプリミティブの数
-
 	}
 }
 

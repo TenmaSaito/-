@@ -49,18 +49,24 @@ void InitPlayer(void)
 	g_player.gravity.orGravity = OR_GRAVITY_GRAVITY;					// 重力を設定
 	g_orGravityExac = g_player.gravity.orGravity;						// 現在の重力を保存
 
-	/*** テクスチャの読み込み ***/
-	D3DXCreateTextureFromFile(pDevice,
-							  "data\\TEXTURE\\PLAYER\\player001.png",
-							  &g_pTexturePlayer);
+	if (g_pTexturePlayer == NULL)
+	{// テクスチャが読み込まれていなければ
+		/*** テクスチャの読み込み ***/
+		D3DXCreateTextureFromFile(pDevice,
+			"data\\TEXTURE\\PLAYER\\player001.png",
+			&g_pTexturePlayer);
+	}
 
-	/*** 頂点バッファの生成 ***/
-	pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
-								D3DUSAGE_WRITEONLY,
-								FVF_VERTEX_2D,
-								D3DPOOL_MANAGED,
-								&g_pVtxBuffPlayer,
-								NULL);
+	if (g_pVtxBuffPlayer == NULL)
+	{// 頂点バッファが生成されていなければ
+		/*** 頂点バッファの生成 ***/
+		pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
+			D3DUSAGE_WRITEONLY,
+			FVF_VERTEX_2D,
+			D3DPOOL_MANAGED,
+			&g_pVtxBuffPlayer,
+			NULL);
+	}
 
 	/*** 頂点バッファの設定 ***/
 	g_pVtxBuffPlayer->Lock(0, 0, (void**)&pVtx, 0);
