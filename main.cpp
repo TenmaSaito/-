@@ -286,12 +286,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ZeroMemory(&oFileName, sizeof(OPENFILENAME));											// 初期化
 			oFileName.lStructSize = sizeof(OPENFILENAME);											// 構造体のサイズ.
 			oFileName.hwndOwner = hWnd;																// オーナーウィンドウ.
-			oFileName.lpstrFilter = TEXT("バイナリファイル (*.bin)\0*.bin;\0\0");					// フィルタ(指定したパターンのファイルだけ見える.)
+			oFileName.lpstrFilter = TEXT("バイナリファイル (*.bin)\0*.bin;\0テキストファイル (*.txt)\0*.txt\0\0");					// フィルタ(指定したパターンのファイルだけ見える.)
 			oFileName.lpstrFile = tszFilePath;														// 入力されたファイルパス.
 			oFileName.Flags = OFN_OVERWRITEPROMPT;													// 既にファイルがある時, 上書きするかの確認を表示.
 			oFileName.nFilterIndex = 1;																// ファイルフィルター
 			oFileName.nMaxFile = MAX_PATH;															// 上記の文字列のデータの最大数
-			oFileName.lpstrDefExt = TEXT(".ui");													// 拡張子の自動追加
+			oFileName.lpstrDefExt = TEXT(".bin");													// 拡張子の自動追加
 			oFileName.nMaxFileTitle = 64;															// ファイル名の最大データ数
 			oFileName.lpstrFileTitle = szFileTitle;													// ファイル名
 			oFileName.lpstrTitle = NULL;															// ダイアログボックスの名前
@@ -329,6 +329,52 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				fwrite(&nCntBlock, sizeof(int), 1, pFile);
 
 				fwrite(pbfeInfo, sizeof(BLOCKFROMEDIT), nCntBlock, pFile);
+
+				fclose(pFile);
+			}
+			else if (strstr(oFileName.lpstrFileTitle, ".txt") != NULL)
+			{
+				pFile = fopen(tszFilePath, "w");			// 入力されたファイルパスで作成
+
+				if (pFile == NULL) { MessageBox(NULL, TEXT("テキストデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
+
+				SetWindowText(hWnd, oFileName.lpstrFile);
+				memset(g_szFileTitle, NULL, sizeof(g_szFileTitle));
+				strcpy(g_szFileTitle, oFileName.lpstrFile);
+
+				pbfeInfo = GetEditerInfo();
+
+				if (pbfeInfo == NULL)
+				{
+					MessageBox(NULL, TEXT("BFE構造体のポインタの取得に失敗"), TEXT("Error"), MB_ICONHAND);
+					break;
+				}
+
+				nCntBlock = GetBlockMax() - 1;
+
+				fprintf(pFile, "#==============================================\n");
+				fprintf(pFile, "#\n");
+				fprintf(pFile, "# %s\n", oFileName.lpstrFileTitle);
+				fprintf(pFile, "# Author : \n");
+				fprintf(pFile, "#\n");
+				fprintf(pFile, "#==============================================\n");
+
+				fprintf(pFile, "SCRIPT\t# 消すな！\n\n");
+				fprintf(pFile, "#==============================================\n");
+				fprintf(pFile, "# --- ブロックの設置 ---\n");
+				fprintf(pFile, "#==============================================\n\n");
+
+				for (int nCnt = 0; nCnt < nCntBlock; nCnt++, pbfeInfo++)
+				{
+					fprintf(pFile, "BLOCKSET\n");
+					fprintf(pFile, "\tTYPE = \n");
+					fprintf(pFile, "\tPOS = %01f %01f %01f\n", pbfeInfo->pos.x, pbfeInfo->pos.y, pbfeInfo->pos.z);
+					fprintf(pFile, "\tCOLOR = %01f %01f %01f %01f\n", pbfeInfo->col.r, pbfeInfo->col.g, pbfeInfo->col.b, pbfeInfo->col.a);
+					fprintf(pFile, "\tSIZE = %01f %01f\n", pbfeInfo->fWidth, pbfeInfo->fHeight);
+					fprintf(pFile, "END_BLOCKSET\n\n");
+				}
+
+				fprintf(pFile, "END_SCRIPT\t# 消すな！");
 
 				fclose(pFile);
 			}
