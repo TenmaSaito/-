@@ -804,7 +804,7 @@ void DrawDebug(void)
 	strcat(&aStr[0][0], &aStr[1][0]);
 
 	// テキストの描画
-    g_pFont->DrawText(NULL, &aStr[0][0], -1, &rect, DT_LEFT, D3DCOLOR_RGBA(255, 255, 255, 255));
+    g_pFont->DrawText(NULL, &aStr[0][0], -1, &rect, DT_LEFT, D3DCOLOR_RGBA(0, 255, 255, 255));
 }
 
 

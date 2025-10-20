@@ -22,6 +22,10 @@
 #define SELECTBLOCK_DOWN			DIK_G					// 選択しているブロックを下にずらす
 #define SELECTBLOCK_LEFT			DIK_F					// 選択しているブロックを左にずらす
 #define SELECTBLOCK_RIGHT			DIK_H					// 選択しているブロックを右にずらす
+#define SELECTBLOCK_WIDTH_UP		DIK_R					// 選択しているブロックを右に伸ばす
+#define SELECTBLOCK_WIDTH_DOWN		DIK_Y					// 選択しているブロックを左に縮める
+#define SELECTBLOCK_HEIGHT_UP		DIK_V					// 選択しているブロックを下に伸ばす
+#define SELECTBLOCK_HEIGHT_DOWN		DIK_B					// 選択しているブロックを上に縮める
 #define SELECTBLOCK_NEXT			DIK_UP					// 選択番号を一つ次にずらす
 #define SELECTBLOCK_LAST			DIK_DOWN				// 選択番号を一つ前に戻す
 #define EDITBLOCK_CREATE			DIK_RETURN				// エディタブロックの位置にエディタブロックの状態のブロックを配置する
@@ -323,6 +327,24 @@ void UpdateBlock(void)
 			else if (GetKeyboardRepeat(SELECTBLOCK_RIGHT))
 			{
 				g_aBlock[g_nSelectBlock].pos.x += 1.0f;
+			}
+
+			if (GetKeyboardRepeat(SELECTBLOCK_HEIGHT_UP))
+			{
+				g_aBlock[g_nSelectBlock].fHeight += 1.0f;
+			}
+			else if (GetKeyboardRepeat(SELECTBLOCK_HEIGHT_DOWN))
+			{
+				g_aBlock[g_nSelectBlock].fHeight -= 1.0f;
+			}
+
+			if (GetKeyboardRepeat(SELECTBLOCK_WIDTH_UP))
+			{
+				g_aBlock[g_nSelectBlock].fWidth += 1.0f;
+			}
+			else if (GetKeyboardRepeat(SELECTBLOCK_WIDTH_DOWN))
+			{
+				g_aBlock[g_nSelectBlock].fWidth -= 1.0f;
 			}
 		}
 	}
