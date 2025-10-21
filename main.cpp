@@ -257,25 +257,72 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case ID_UPDATESAVE:
 
-			pFile = fopen(g_szFileTitle, "wb");			// 入力されたファイルパスで作成
-
-			if (pFile == NULL) { MessageBox(NULL, TEXT("バイナリデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
-
-			pbfeInfo = GetEditerInfo();
-
-			if (pbfeInfo == NULL)
+			if (strstr(g_szFileTitle, ".bin") != NULL)
 			{
-				MessageBox(NULL, TEXT("BFE構造体のポインタの取得に失敗"), TEXT("Error"), MB_ICONHAND);
-				break;
+				pFile = fopen(g_szFileTitle, "wb");			// 入力されたファイルパスで作成
+
+				if (pFile == NULL) { MessageBox(NULL, TEXT("バイナリデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
+
+				pbfeInfo = GetEditerInfo();
+
+				if (pbfeInfo == NULL)
+				{
+					MessageBox(NULL, TEXT("BFE構造体のポインタの取得に失敗"), TEXT("Error"), MB_ICONHAND);
+					break;
+				}
+
+				nCntBlock = GetBlockMax() - 1;
+
+				fwrite(&nCntBlock, sizeof(int), 1, pFile);
+
+				fwrite(pbfeInfo, sizeof(BLOCKFROMEDIT), nCntBlock, pFile);
+
+				fclose(pFile);
 			}
+			else if (strstr(g_szFileTitle, ".txt") != NULL)
+			{
+				pFile = fopen(g_szFileTitle, "w");			// 入力されたファイルパスで作成
 
-			nCntBlock = GetBlockMax() - 1;
+				if (pFile == NULL) { MessageBox(NULL, TEXT("テキストデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
 
-			fwrite(&nCntBlock, sizeof(int), 1, pFile);
+				SetWindowText(hWnd, g_szFileTitle);
 
-			fwrite(pbfeInfo, sizeof(BLOCKFROMEDIT), nCntBlock, pFile);
+				pbfeInfo = GetEditerInfo();
 
-			fclose(pFile);
+				if (pbfeInfo == NULL)
+				{
+					MessageBox(NULL, TEXT("BFE構造体のポインタの取得に失敗"), TEXT("Error"), MB_ICONHAND);
+					break;
+				}
+
+				nCntBlock = GetBlockMax() - 1;
+
+				fprintf(pFile, "#==============================================\n");
+				fprintf(pFile, "#\n");
+				fprintf(pFile, "# %s\n", g_szFileTitle);
+				fprintf(pFile, "# Author : \n");
+				fprintf(pFile, "#\n");
+				fprintf(pFile, "#==============================================\n");
+
+				fprintf(pFile, "SCRIPT\t# 消すな！\n\n");
+				fprintf(pFile, "#==============================================\n");
+				fprintf(pFile, "# --- ブロックの設置 ---\n");
+				fprintf(pFile, "#==============================================\n\n");
+
+				for (int nCnt = 0; nCnt < nCntBlock; nCnt++, pbfeInfo++)
+				{
+					fprintf(pFile, "BLOCKSET\n");
+					fprintf(pFile, "\tTYPE = 0\n");
+					fprintf(pFile, "\tPOS = %.1f %.1f %.1f\n", pbfeInfo->pos.x, pbfeInfo->pos.y, pbfeInfo->pos.z);
+					fprintf(pFile, "\tCOLOR = %.1f %.1f %.1f %.1f\n", pbfeInfo->col.r, pbfeInfo->col.g, pbfeInfo->col.b, pbfeInfo->col.a);
+					fprintf(pFile, "\tSIZE = %.1f %.1f\n", pbfeInfo->fWidth, pbfeInfo->fHeight);
+					fprintf(pFile, "END_BLOCKSET\n\n");
+				}
+
+				fprintf(pFile, "END_SCRIPT\t# 消すな！");
+
+				fclose(pFile);
+			}
 
 			break;
 
@@ -306,7 +353,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			if (strstr(oFileName.lpstrFileTitle, ".bin") != NULL)
 			{
-				pFile = fopen(tszFilePath, "wb");			// 入力されたファイルパスで作成
+				pFile = fopen(oFileName.lpstrFile, "wb");			// 入力されたファイルパスで作成
 
 				if (pFile == NULL) { MessageBox(NULL, TEXT("バイナリデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
 
@@ -334,7 +381,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (strstr(oFileName.lpstrFileTitle, ".txt") != NULL)
 			{
-				pFile = fopen(tszFilePath, "w");			// 入力されたファイルパスで作成
+				pFile = fopen(oFileName.lpstrFile, "w");			// 入力されたファイルパスで作成
 
 				if (pFile == NULL) { MessageBox(NULL, TEXT("テキストデータの保存に失敗"), TEXT("Error"), MB_ICONHAND); break; };
 
@@ -697,12 +744,10 @@ void Draw(void)
 		//DrawFade();
 #endif
 
-#ifdef _DEBUG
 
 		// デバッグ表示
 		DrawDebug();
 
-#endif // _DEBUG
 
 		// 描画終了
 		g_pD3DDevice->EndScene();
