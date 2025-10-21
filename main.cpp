@@ -291,7 +291,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			oFileName.Flags = OFN_OVERWRITEPROMPT;													// 既にファイルがある時, 上書きするかの確認を表示.
 			oFileName.nFilterIndex = 1;																// ファイルフィルター
 			oFileName.nMaxFile = MAX_PATH;															// 上記の文字列のデータの最大数
-			oFileName.lpstrDefExt = TEXT(".bin");													// 拡張子の自動追加
+			oFileName.lpstrDefExt = TEXT(".txt");													// 拡張子の自動追加
 			oFileName.nMaxFileTitle = 64;															// ファイル名の最大データ数
 			oFileName.lpstrFileTitle = szFileTitle;													// ファイル名
 			oFileName.lpstrTitle = NULL;															// ダイアログボックスの名前
@@ -367,10 +367,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				for (int nCnt = 0; nCnt < nCntBlock; nCnt++, pbfeInfo++)
 				{
 					fprintf(pFile, "BLOCKSET\n");
-					fprintf(pFile, "\tTYPE = \n");
-					fprintf(pFile, "\tPOS = %01f %01f %01f\n", pbfeInfo->pos.x, pbfeInfo->pos.y, pbfeInfo->pos.z);
-					fprintf(pFile, "\tCOLOR = %01f %01f %01f %01f\n", pbfeInfo->col.r, pbfeInfo->col.g, pbfeInfo->col.b, pbfeInfo->col.a);
-					fprintf(pFile, "\tSIZE = %01f %01f\n", pbfeInfo->fWidth, pbfeInfo->fHeight);
+					fprintf(pFile, "\tTYPE = 0\n");
+					fprintf(pFile, "\tPOS = %.1f %.1f %.1f\n", pbfeInfo->pos.x, pbfeInfo->pos.y, pbfeInfo->pos.z);
+					fprintf(pFile, "\tCOLOR = %.1f %.1f %.1f %.1f\n", pbfeInfo->col.r, pbfeInfo->col.g, pbfeInfo->col.b, pbfeInfo->col.a);
+					fprintf(pFile, "\tSIZE = %.1f %.1f\n", pbfeInfo->fWidth, pbfeInfo->fHeight);
 					fprintf(pFile, "END_BLOCKSET\n\n");
 				}
 
